@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Orchid.UnitTests.Web;
 
-public sealed class WebGardenRazorDiRegistrationTests
+public sealed class WebGardenRazorDiRegistrationTest
 {
     [Fact]
     public void GivenWebServiceCollection_WhenRegisteringGardenRazor_ThenServicesAreResolvable()

@@ -9,7 +9,7 @@ namespace Orchid.UnitTests.Web;
 /// <summary>
 /// <see cref="WebClipboardAdapter"/>의 JavaScript interop 호출 및 브라우저 예외 격리를 검증하는 단위 테스트입니다.
 /// </summary>
-public sealed class WebClipboardAdapterTests
+public sealed class WebClipboardAdapterTest
 {
     [Fact]
     public async Task GetTextAsync_WhenJsThrows_ShouldReturnNull()
