@@ -1,0 +1,62 @@
+name: publish-web-image
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build (branch, tag, or full SHA). Defaults to the dispatch ref.'
+        required: false
+        default: ''
+      promote-staging:
+        description: 'Commit the published tag to the Orchid.Aspire staging overlay.'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-web-${{ inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish web image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      stag-tag: ${{ steps.tags.outputs.stag-tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Compute tags
+        id: tags
+        run: |
+          SHORT_SHA="$(git rev-parse --short=7 HEAD)"
+          BUILD_STAMP="$(date -u +%Y%m%d%H%M%S)"
+          IMAGE="${{ secrets.HARBOR_REGISTRY }}/orchid/web"
+          echo "tags=${IMAGE}:sha-${SHORT_SHA},${IMAGE}:stag-${BUILD_STAMP}-${SHORT_SHA},${IMAGE}:latest" >> "$GITHUB_OUTPUT"
+          echo "stag-tag=stag-${BUILD_STAMP}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Login to Harbor
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ secrets.HARBOR_REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: src/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=min,ignore-error=true
+          provenance: false

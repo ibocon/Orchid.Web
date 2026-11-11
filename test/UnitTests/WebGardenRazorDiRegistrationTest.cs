@@ -44,6 +44,23 @@ public sealed class WebGardenRazorDiRegistrationTest
         html.Should().Contain("<base href=\"/orchid/\" />");
     }
 
+    [Fact]
+    public void DockerfileNginxAndWorkflowShouldBeConfiguredForHanulStaging()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string dockerfile = File.ReadAllText(Path.Combine(repoRoot, "src/Dockerfile"));
+        string nginxConf = File.ReadAllText(Path.Combine(repoRoot, "src/nginx.conf"));
+        string workflow = File.ReadAllText(Path.Combine(repoRoot, ".github/workflows/publish-web-image.yml"));
+
+        // When & Then
+        dockerfile.Should().Contain("src/Orchid.Web.csproj");
+        dockerfile.Should().Contain("EXPOSE 8080");
+        nginxConf.Should().Contain("listen 8080;");
+        workflow.Should().Contain("/orchid/web");
+        workflow.Should().Contain("file: src/Dockerfile");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? dir = new(AppContext.BaseDirectory);
