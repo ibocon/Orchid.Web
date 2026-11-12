@@ -1,20 +1,33 @@
 @page "/"
 
-<PageTitle>Orchid - E2EE 웹 대시보드</PageTitle>
+<PageTitle>Universal Clipboard Bridge - E2EE 웹 대시보드</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudPaper Elevation="1" Class="pa-6 mb-4">
-        <div class="d-flex align-center gap-3">
-            <MudIcon Icon="@Icons.Material.Filled.Spa" Size="MudSize.Large" Color="Color.Success" />
-            <div>
-                <MudText Typo="Typo.h5">Orchid 클립보드 뷰어</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Zero-Knowledge E2EE 클립보드 동기화 대시보드</MudText>
-            </div>
-        </div>
-    </MudPaper>
+<div class="orchid-web-shell">
+    <GardenTopAppBar Height="16" PaddingHorizontal="4" PaddingVertical="2">
+        <LeadingContent>
+            <MudIcon Icon="@Icons.Material.Filled.ContentPasteGo" Style="margin-right: var(--gdn-sys-spacing-2);" />
+            <GardenTypography HtmlTag="h1" Typo="TypographyStyle.Title" Size="TypographySize.Large">
+                Universal Clipboard Bridge
+            </GardenTypography>
+        </LeadingContent>
+        <TrailingContent>
+            <GardenChipAssist Label="Zero-Knowledge E2EE" Variant="GardenChipAssistVariant.Outlined" />
+        </TrailingContent>
+    </GardenTopAppBar>
 
-    <VirtualizedHistoryGrid Items="@sampleItems" />
-</MudContainer>
+    <main style="max-width: 1120px; margin: 24px auto; padding: 0 16px; display: flex; flex-direction: column; gap: 16px;">
+        <GardenCard Type="GardenCardType.Elevated" Style="padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <GardenTypography HtmlTag="h2" Typo="TypographyStyle.Headline" Size="TypographySize.Small">
+                Orchid 클립보드 뷰어
+            </GardenTypography>
+            <GardenTypography Typo="TypographyStyle.Body" Size="TypographySize.Medium">
+                Zero-Knowledge E2EE 클립보드 동기화 대시보드
+            </GardenTypography>
+        </GardenCard>
+
+        <VirtualizedHistoryGrid Items="@sampleItems" />
+    </main>
+</div>
 
 @code {
     private List<ClipboardItem> sampleItems = [];

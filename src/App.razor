@@ -1,7 +1,7 @@
 <OrchidWebDesignSystemProvider @ref="_provider" />
 <MudThemeProvider Theme="_provider?.CurrentMudTheme" IsDarkMode="true" />
 <MudDialogProvider />
-<MudSnackbarProvider />
+<GardenSnackbarProvider />
 <MudPopoverProvider />
 
 <Router AppAssembly="@typeof(App).Assembly">
@@ -11,7 +11,11 @@
     </Found>
     <NotFound>
         <LayoutView>
-            <MudAlert Severity="Severity.Warning">페이지를 찾을 수 없습니다.</MudAlert>
+            <GardenCard Type="GardenCardType.Outlined" Style="margin: 24px; padding: 24px;">
+                <GardenTypography Typo="TypographyStyle.Title" Size="TypographySize.Medium">
+                    페이지를 찾을 수 없습니다.
+                </GardenTypography>
+            </GardenCard>
         </LayoutView>
     </NotFound>
 </Router>
