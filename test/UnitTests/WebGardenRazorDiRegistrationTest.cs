@@ -9,10 +9,10 @@ namespace Orchid.UnitTests.Web;
 public sealed class WebGardenRazorDiRegistrationTest
 {
     [Fact]
-    public void GivenWebServiceCollection_WhenRegisteringGardenRazor_ThenServicesAreResolvable()
+    public void GivenWebServiceCollectionWhenRegisteringGardenRazorThenServicesAreResolvable()
     {
         // Given
-        var services = new ServiceCollection();
+        ServiceCollection services = new ServiceCollection();
         services.AddLogging();
         services.AddLocalization();
         services.AddMudServices();

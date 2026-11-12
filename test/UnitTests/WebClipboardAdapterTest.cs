@@ -12,16 +12,16 @@ namespace Orchid.UnitTests.Web;
 public sealed class WebClipboardAdapterTest
 {
     [Fact]
-    public async Task GetTextAsync_WhenJsThrows_ShouldReturnNull()
+    public async Task GetTextAsyncWhenJsThrowsShouldReturnNull()
     {
         // Given
-        var jsMock = new Mock<IJSRuntime>();
+        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
         jsMock.Setup(js => js.InvokeAsync<string?>(
             "navigator.clipboard.readText",
             It.IsAny<object?[]>()))
             .ThrowsAsync(new JSException("Clipboard permission denied"));
 
-        var adapter = new WebClipboardAdapter(jsMock.Object);
+        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
 
         // When
         var result = await adapter.GetTextAsync();
@@ -31,16 +31,16 @@ public sealed class WebClipboardAdapterTest
     }
 
     [Fact]
-    public async Task GetTextAsync_WhenSuccessful_ShouldReturnText()
+    public async Task GetTextAsyncWhenSuccessfulShouldReturnText()
     {
         // Given
-        var jsMock = new Mock<IJSRuntime>();
+        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
         jsMock.Setup(js => js.InvokeAsync<string?>(
             "navigator.clipboard.readText",
             It.IsAny<object?[]>()))
             .ReturnsAsync("Hello Web");
 
-        var adapter = new WebClipboardAdapter(jsMock.Object);
+        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
 
         // When
         var result = await adapter.GetTextAsync();
@@ -50,11 +50,11 @@ public sealed class WebClipboardAdapterTest
     }
 
     [Fact]
-    public async Task SetTextAsync_WhenNullText_ShouldThrowArgumentNullException()
+    public async Task SetTextAsyncWhenNullTextShouldThrowArgumentNullException()
     {
         // Given
-        var jsMock = new Mock<IJSRuntime>();
-        var adapter = new WebClipboardAdapter(jsMock.Object);
+        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
+        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
 
         // When & Then
         Func<Task> act = async () => await adapter.SetTextAsync(null!);
