@@ -3,15 +3,35 @@
 <PageTitle>Universal Clipboard Bridge - E2EE 웹 대시보드</PageTitle>
 
 <div class="orchid-web-shell">
-    <GardenTopAppBar Height="16" PaddingHorizontal="4" PaddingVertical="2">
+    <GardenTopAppBar Height="16"
+                     PaddingHorizontal="4"
+                     PaddingVertical="1">
         <LeadingContent>
-            <MudIcon Icon="@Icons.Material.Filled.ContentPasteGo" Style="margin-right: var(--gdn-sys-spacing-2);" />
-            <GardenTypography HtmlTag="h1" Typo="TypographyStyle.Title" Size="TypographySize.Large">
+            <MudIcon Icon="@Icons.Material.Filled.ContentPasteGo"
+                     Style="margin-right: var(--gdn-sys-spacing-2);" />
+            <GardenTypography HtmlTag="h1"
+                              Typo="TypographyStyle.Title"
+                              Size="TypographySize.Large"
+                              Style="margin-right: var(--gdn-sys-spacing-4); font-weight: 600; white-space: nowrap;">
                 Universal Clipboard Bridge
             </GardenTypography>
         </LeadingContent>
+        <HeadlineContent>
+            <div style="max-width: 360px; width: 100%;">
+                <GardenSearch T="string"
+                              Placeholder="클립보드 내역 검색..."
+                              TextChanged="OnSearchTextChanged" />
+            </div>
+        </HeadlineContent>
         <TrailingContent>
-            <GardenChipAssist Label="Zero-Knowledge E2EE" Variant="GardenChipAssistVariant.Outlined" />
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <GardenChipAssist Icon="@Icons.Material.Filled.Lock"
+                                  Label="Zero-Knowledge E2EE"
+                                  Variant="GardenChipAssistVariant.Outlined" />
+                <GardenAccountMenu DisplayName="Orchid Web"
+                                   Email="e2ee@botanicsoft.com"
+                                   SignOutLabel="로그아웃" />
+            </div>
         </TrailingContent>
     </GardenTopAppBar>
 
@@ -25,12 +45,20 @@
             </GardenTypography>
         </GardenCard>
 
-        <VirtualizedHistoryGrid Items="@sampleItems" />
+        <VirtualizedHistoryGrid Items="@FilteredItems" />
     </main>
 </div>
 
 @code {
     private List<ClipboardItem> sampleItems = [];
+    private string searchQuery = string.Empty;
+
+    private ICollection<ClipboardItem> FilteredItems =>
+        string.IsNullOrWhiteSpace(searchQuery)
+            ? sampleItems
+            : sampleItems
+                .Where(item => item.ContentType.ToString().Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
     protected override void OnInitialized()
     {
@@ -47,5 +75,10 @@
                 "hash-1234",
                 DateTimeOffset.UtcNow)
         ];
+    }
+
+    private void OnSearchTextChanged(string text)
+    {
+        searchQuery = text ?? string.Empty;
     }
 }

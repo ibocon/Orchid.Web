@@ -26,6 +26,8 @@ public sealed class WebGardenRazorComponentAdoptionTest
         appRazor.Should().NotContain("<MudAlert");
 
         indexRazor.Should().Contain("<GardenTopAppBar");
+        indexRazor.Should().Contain("<GardenSearch");
+        indexRazor.Should().Contain("<GardenAccountMenu");
         indexRazor.Should().Contain("<GardenCard");
         indexRazor.Should().Contain("<GardenTypography");
         indexRazor.Should().NotContain("<MudPaper");
@@ -37,6 +39,19 @@ public sealed class WebGardenRazorComponentAdoptionTest
         gridRazor.Should().NotContain("<MudTable");
         gridRazor.Should().NotContain("<MudChip");
         gridRazor.Should().NotContain("<MudText");
+    }
+
+    [Fact]
+    public void IndexHtmlShouldIncludeBlazorScopedCssBundleForGardenRazor()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string indexHtml = File.ReadAllText(Path.Combine(repoRoot, "src/wwwroot/index.html"));
+
+        // When & Then
+        // ✅ Garden.Razor.bundle.scp.css를 로드하는 Orchid.Web.styles.css 링크가 존재한다
+        indexHtml.Should().Contain("Orchid.Web.styles.css");
+        indexHtml.Should().Contain("_content/Garden.Razor/Garden.Razor.min.css");
     }
 
     private static string FindRepositoryRoot()
