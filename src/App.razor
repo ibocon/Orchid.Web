@@ -1,5 +1,8 @@
+@inject DesignSystem DesignSystem
+@implements IDisposable
+
 <OrchidWebDesignSystemProvider @ref="_provider" />
-<MudThemeProvider Theme="_provider?.CurrentMudTheme" IsDarkMode="true" />
+<MudThemeProvider Theme="_provider?.CurrentMudTheme" IsDarkMode="@(_provider?.IsDarkMode ?? false)" />
 <MudDialogProvider />
 <GardenSnackbarProvider />
 <MudPopoverProvider />
@@ -22,4 +25,19 @@
 
 @code {
     private OrchidWebDesignSystemProvider? _provider;
+
+    protected override void OnInitialized()
+    {
+        DesignSystem.Color.SchemeSet.ContextChanged += OnSchemeContextChanged;
+    }
+
+    private void OnSchemeContextChanged(object? sender, SchemeContextChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        DesignSystem.Color.SchemeSet.ContextChanged -= OnSchemeContextChanged;
+    }
 }

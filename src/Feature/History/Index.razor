@@ -1,5 +1,7 @@
 @page "/"
 
+@inject DesignSystem DesignSystem
+
 <PageTitle>Universal Clipboard Bridge - E2EE 웹 대시보드</PageTitle>
 
 <div class="orchid-web-shell">
@@ -26,8 +28,14 @@
         <TrailingContent>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <GardenChipAssist Icon="@Icons.Material.Filled.Lock"
-                                  Label="Zero-Knowledge E2EE"
-                                  Variant="GardenChipAssistVariant.Outlined" />
+                                   Label="Zero-Knowledge E2EE"
+                                   Variant="GardenChipAssistVariant.Outlined" />
+                <GardenIconButton Variant="GardenIconButtonVariant.Standard"
+                                  Size="GardenIconButtonSize.Small"
+                                  Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                                  OnClick="ToggleTheme"
+                                  aria-label="테마 전환"
+                                  title="Light/Dark 테마 전환" />
                 <GardenAccountMenu DisplayName="Orchid Web"
                                    Email="e2ee@botanicsoft.com"
                                    SignOutLabel="로그아웃" />
@@ -52,6 +60,11 @@
 @code {
     private List<ClipboardItem> sampleItems = [];
     private string searchQuery = string.Empty;
+
+    private bool IsDarkMode => DesignSystem.Color.SchemeSet.Context == SchemeContext.Dark;
+
+    private void ToggleTheme(MouseEventArgs _) =>
+        DesignSystem.Color.SchemeSet.ChangeContext(IsDarkMode ? SchemeContext.Light : SchemeContext.Dark);
 
     private ICollection<ClipboardItem> FilteredItems =>
         string.IsNullOrWhiteSpace(searchQuery)

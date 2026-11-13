@@ -1,5 +1,9 @@
 // keep: FluentAssertions assertions
 using FluentAssertions;
+// keep: Garden.Razor design system
+using Garden.Razor;
+// keep: Microsoft.Extensions.DependencyInjection
+using Microsoft.Extensions.DependencyInjection;
 // keep: xUnit Fact attribute
 using Xunit;
 
@@ -10,6 +14,41 @@ namespace Orchid.UnitTests.Web;
 /// </summary>
 public sealed class WebGardenRazorComponentAdoptionTest
 {
+    [Fact]
+    public void DesignSystemSchemeSetShouldSwitchBetweenLightAndDarkContexts()
+    {
+        // Given
+        ServiceCollection services = new();
+        services.AddLogging();
+        services.AddDesignSystem();
+        using ServiceProvider provider = services.BuildServiceProvider();
+        DesignSystem designSystem = provider.GetRequiredService<DesignSystem>();
+        List<SchemeContext> raisedContexts = [];
+        designSystem.Color.SchemeSet.ContextChanged += (_, eventArgs) => raisedContexts.Add(eventArgs.SchemeContext);
+
+        // When
+        SchemeContext initial = designSystem.Color.SchemeSet.Context;
+        string lightSurface = designSystem.Color.SchemeSet.Current.Surface.ToHex();
+
+        designSystem.Color.SchemeSet.ChangeContext(SchemeContext.Dark);
+        SchemeContext toggled = designSystem.Color.SchemeSet.Context;
+        string darkSurface = designSystem.Color.SchemeSet.Current.Surface.ToHex();
+
+        designSystem.Color.SchemeSet.ChangeContext(SchemeContext.Light);
+        SchemeContext restored = designSystem.Color.SchemeSet.Context;
+        string restoredSurface = designSystem.Color.SchemeSet.Current.Surface.ToHex();
+
+        // Then
+        // ✅ 초기 문맥이 Light이고 Dark 전환 시 Surface 색상이 달라지며 ContextChanged가 발생한다
+        initial.Should().Be(SchemeContext.Light);
+        toggled.Should().Be(SchemeContext.Dark);
+        lightSurface.Should().NotBe(darkSurface);
+        // ✅ Light 복귀 시 문맥과 Surface 색상이 원복된다
+        restored.Should().Be(SchemeContext.Light);
+        restoredSurface.Should().Be(lightSurface);
+        raisedContexts.Should().Equal(SchemeContext.Dark, SchemeContext.Light);
+    }
+
     [Fact]
     public void WebRazorViewsShouldUseGardenRazorComponentsInsteadOfRawMudUiTags()
     {
@@ -39,6 +78,78 @@ public sealed class WebGardenRazorComponentAdoptionTest
         gridRazor.Should().NotContain("<MudTable");
         gridRazor.Should().NotContain("<MudChip");
         gridRazor.Should().NotContain("<MudText");
+    }
+
+    [Fact]
+    public void WebDesignSystemProviderShouldDefaultToLightThemeAndExposeThemeToggleApi()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string providerCode = File.ReadAllText(
+            Path.Combine(repoRoot, "src/Component/OrchidWebDesignSystemProvider/OrchidWebDesignSystemProvider.razor.cs"));
+
+        // When & Then
+        // ✅ 초기 기본 테마가 SchemeContext.Light로 적용된다
+        providerCode.Should().Contain("ChangeContext(SchemeContext.Light)");
+        providerCode.Should().NotContain("ChangeContext(SchemeContext.Dark)");
+        // ✅ PaletteLight와 PaletteDark가 모두 구성된다
+        providerCode.Should().Contain("PaletteLight");
+        providerCode.Should().Contain("PaletteDark");
+        // ✅ 테마 전환 공개 API가 존재한다
+        providerCode.Should().Contain("public bool IsDarkMode");
+        providerCode.Should().Contain("public SchemeContext CurrentSchemeContext");
+        providerCode.Should().Contain("public void ToggleTheme()");
+        providerCode.Should().Contain("public void SetTheme(SchemeContext context)");
+    }
+
+    [Fact]
+    public void AppRazorShouldBindThemeProviderToProviderIsDarkMode()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string appRazor = File.ReadAllText(Path.Combine(repoRoot, "src/App.razor"));
+
+        // When & Then
+        // ✅ IsDarkMode가 true 리터럴로 고정되지 않고 프로바이더 상태로 바인딩된다
+        appRazor.Should().NotContain("IsDarkMode=\"true\"");
+        appRazor.Should().Contain("IsDarkMode=\"@(_provider?.IsDarkMode ?? false)\"");
+        // ✅ 스킴 문맥 변경 시 루트 MudThemeProvider가 재렌더링된다
+        appRazor.Should().Contain("@inject DesignSystem DesignSystem");
+        appRazor.Should().Contain("@implements IDisposable");
+        appRazor.Should().Contain("DesignSystem.Color.SchemeSet.ContextChanged");
+    }
+
+    [Fact]
+    public void IndexRazorTrailingContentShouldRenderGardenIconButtonThemeToggle()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string indexRazor = File.ReadAllText(Path.Combine(repoRoot, "src/Feature/History/Index.razor"));
+
+        // When & Then
+        // ✅ TrailingContent에 GardenIconButton 기반 Light/Dark 전환 아이콘이 존재한다
+        indexRazor.Should().Contain("<GardenIconButton");
+        indexRazor.Should().Contain("Icons.Material.Filled.LightMode");
+        indexRazor.Should().Contain("Icons.Material.Filled.DarkMode");
+        indexRazor.Should().Contain("@inject DesignSystem DesignSystem");
+        // ✅ 원시 MudIconButton는 사용되지 않는다
+        indexRazor.Should().NotContain("<MudIconButton");
+    }
+
+    [Fact]
+    public void AppCssShouldUseGardenDesignSystemColorTokensInsteadOfDarkHex()
+    {
+        // Given
+        string repoRoot = FindRepositoryRoot();
+        string appCss = File.ReadAllText(Path.Combine(repoRoot, "src/wwwroot/css/app.css"));
+
+        // When & Then
+        // ✅ 다크 전용 HEX 하드코딩이 제거된다
+        appCss.Should().NotContain("#121212");
+        appCss.Should().NotContain("#1e1e1e");
+        // ✅ Garden 디자인 시스템 색상 토큰을 사용한다
+        appCss.Should().Contain("var(--gdn-sys-color-surface)");
+        appCss.Should().Contain("var(--gdn-sys-color-on-surface)");
     }
 
     [Fact]
