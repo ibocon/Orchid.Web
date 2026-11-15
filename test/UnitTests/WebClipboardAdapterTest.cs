@@ -15,16 +15,16 @@ public sealed class WebClipboardAdapterTest
     public async Task GetTextAsyncWhenJsThrowsShouldReturnNull()
     {
         // Given
-        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
+        Mock<IJSRuntime> jsMock = new();
         jsMock.Setup(js => js.InvokeAsync<string?>(
             "navigator.clipboard.readText",
             It.IsAny<object?[]>()))
             .ThrowsAsync(new JSException("Clipboard permission denied"));
 
-        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
+        WebClipboardAdapter adapter = new(jsMock.Object);
 
         // When
-        var result = await adapter.GetTextAsync();
+        string? result = await adapter.GetTextAsync();
 
         // Then
         result.Should().BeNull();
@@ -34,16 +34,16 @@ public sealed class WebClipboardAdapterTest
     public async Task GetTextAsyncWhenSuccessfulShouldReturnText()
     {
         // Given
-        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
+        Mock<IJSRuntime> jsMock = new();
         jsMock.Setup(js => js.InvokeAsync<string?>(
             "navigator.clipboard.readText",
             It.IsAny<object?[]>()))
             .ReturnsAsync("Hello Web");
 
-        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
+        WebClipboardAdapter adapter = new(jsMock.Object);
 
         // When
-        var result = await adapter.GetTextAsync();
+        string? result = await adapter.GetTextAsync();
 
         // Then
         result.Should().Be("Hello Web");
@@ -53,8 +53,8 @@ public sealed class WebClipboardAdapterTest
     public async Task SetTextAsyncWhenNullTextShouldThrowArgumentNullException()
     {
         // Given
-        Mock<IJSRuntime> jsMock = new Mock<IJSRuntime>();
-        WebClipboardAdapter adapter = new WebClipboardAdapter(jsMock.Object);
+        Mock<IJSRuntime> jsMock = new();
+        WebClipboardAdapter adapter = new(jsMock.Object);
 
         // When & Then
         Func<Task> act = async () => await adapter.SetTextAsync(null!);

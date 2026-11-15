@@ -12,7 +12,7 @@ public sealed class WebGardenRazorDiRegistrationTest
     public void GivenWebServiceCollectionWhenRegisteringGardenRazorThenServicesAreResolvable()
     {
         // Given
-        ServiceCollection services = new ServiceCollection();
+        ServiceCollection services = new();
         services.AddLogging();
         services.AddLocalization();
         services.AddMudServices();
@@ -20,13 +20,13 @@ public sealed class WebGardenRazorDiRegistrationTest
         services.AddDesignSystem();
 
         // When
-        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
-        using var scope = provider.CreateScope();
+        using ServiceProvider provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using IServiceScope scope = provider.CreateScope();
 
         // Then
-        var dialogService = scope.ServiceProvider.GetService<MudBlazor.IDialogService>();
-        var presenter = scope.ServiceProvider.GetService<ExceptionPresenter>();
-        var designSystem = scope.ServiceProvider.GetService<DesignSystem>();
+        MudBlazor.IDialogService? dialogService = scope.ServiceProvider.GetService<MudBlazor.IDialogService>();
+        ExceptionPresenter? presenter = scope.ServiceProvider.GetService<ExceptionPresenter>();
+        DesignSystem? designSystem = scope.ServiceProvider.GetService<DesignSystem>();
 
         dialogService.Should().NotBeNull();
         presenter.Should().NotBeNull();
