@@ -75,19 +75,7 @@
 
     protected override void OnInitialized()
     {
-        sampleItems =
-        [
-            new ClipboardItem(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                DevicePlatform.Web,
-                ContentType.Text,
-                [1, 2, 3, 4],
-                [5, 6, 7],
-                [8, 9],
-                "hash-1234",
-                DateTimeOffset.UtcNow)
-        ];
+        sampleItems = [.. HistorySampleItems.Create()];
     }
 
     private void OnSearchTextChanged(string text)
