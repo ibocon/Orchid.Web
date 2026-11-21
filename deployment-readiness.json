@@ -1,0 +1,1 @@
+{"$schema":"https://garden.mangoslab.org/schemas/deployment-readiness.schema.json","services":{"overlayReference":{"target":"orchid-aspire","path":"deploy/k8s/overlays/staging/kustomization.yaml"},"targets":[{"id":"web","workflow":".github/workflows/publish-web-image.yml","image":"harbor.hanul.botanicsoft.com/orchid/web","impactPaths":["src/","deploy/",".github/workflows/"]}]}}
